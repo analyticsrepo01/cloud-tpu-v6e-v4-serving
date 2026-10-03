@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables & Secrets
+.env
+.env.*
+*.pem
+*.key
+*.token
+credentials.json
+service_account.json
+client_secrets.json
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+*-checkpoint.ipynb
+
+# IDEs & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs & Test outputs
+*.log
+logs/
+results/
+tmp/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Personal Career & Candidate Notes (not published to repo)
+*RESUME*
+*PORTFOLIO*
+docs/RESUME_PORTFOLIO_GUIDE.md

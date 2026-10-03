@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Cloud TPU v6e Trillium LLM Serving Architecture",
+    "quality_profile": "showcase",
+    "viewBox": [1160, 680],
+    "views": [
+      {
+        "id": "inference-path",
+        "label": "Inference delivery path",
+        "focus": ["client", "endpoint", "vllm", "tpu"],
+        "note": "Client requests flow through the dedicated Vertex AI endpoint directly into the vLLM engine mapped across 4 TPU v6e Trillium chips."
+      },
+      {
+        "id": "storage-and-registry",
+        "label": "Model weights & telemetry",
+        "focus": ["huggingface", "gcs", "vllm", "monitoring"],
+        "note": "Weights are staged from Hugging Face / GCS into high-bandwidth memory while telemetry is emitted to Cloud Monitoring."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Client Application",
+      "sublabel": "Python SDK / REST API",
+      "pos": [36, 280],
+      "size": [130, 68]
+    },
+    {
+      "id": "endpoint",
+      "type": "cloud",
+      "label": "Vertex AI Endpoint",
+      "sublabel": "Dedicated HTTPS Gateway",
+      "brand": "google-cloud",
+      "pos": [246, 280],
+      "size": [144, 68]
+    },
+    {
+      "id": "vllm",
+      "type": "backend",
+      "label": "vLLM Engine",
+      "sublabel": "PagedAttention & Prefix Cache",
+      "brand": "docker",
+      "pos": [490, 280],
+      "size": [144, 68]
+    },
+    {
+      "id": "tpu",
+      "type": "backend",
+      "label": "TPU v6e Trillium",
+      "sublabel": "4x Chips (2x2 Mesh / ICI)",
+      "brand": "google-cloud",
+      "pos": [740, 280],
+      "size": [156, 68]
+    },
+    {
+      "id": "huggingface",
+      "type": "external",
+      "label": "Hugging Face Hub",
+      "sublabel": "Gemma 3 / Llama 3.1",
+      "brand": "hugging-face",
+      "pos": [246, 460],
+      "size": [144, 68]
+    },
+    {
+      "id": "gcs",
+      "type": "database",
+      "label": "Cloud Storage",
+      "sublabel": "Staging & Checkpoints",
+      "brand": "google-cloud",
+      "pos": [490, 460],
+      "size": [144, 68]
+    },
+    {
+      "id": "monitoring",
+      "type": "cloud",
+      "label": "Cloud Monitoring",
+      "sublabel": "Latency & Throughput SLA",
+      "brand": "google-cloud",
+      "pos": [740, 460],
+      "size": [156, 68]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Google Cloud Platform (europe-west4)",
+      "wraps": ["endpoint", "vllm", "tpu", "gcs", "monitoring"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "client-to-endpoint",
+      "from": "client",
+      "to": "endpoint",
+      "label": "POST /generate",
+      "variant": "emphasis"
+    },
+    {
+      "id": "endpoint-to-vllm",
+      "from": "endpoint",
+      "to": "vllm",
+      "label": "HTTP :7080",
+      "variant": "default"
+    },
+    {
+      "id": "vllm-to-tpu",
+      "from": "vllm",
+      "to": "tpu",
+      "label": "XLA TP=4",
+      "variant": "emphasis"
+    },
+    {
+      "id": "hf-to-endpoint",
+      "from": "huggingface",
+      "to": "endpoint",
+      "label": "weights",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [318, 395]
+    },
+    {
+      "id": "gcs-to-vllm",
+      "from": "gcs",
+      "to": "vllm",
+      "label": "staging",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [562, 395]
+    },
+    {
+      "id": "tpu-to-monitoring",
+      "from": "tpu",
+      "to": "monitoring",
+      "label": "metrics",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [818, 395]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "vLLM on TPU XLA",
+      "items": [
+        "PagedAttention eliminates KV-cache fragmentation",
+        "Prefix caching slashes TTFT for shared prompts"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Trillium Hardware",
+      "items": [
+        "4x TPU v6e chips in 2x2 physical mesh topology",
+        "Optical Inter-Chip Interconnect with zero bottlenecks"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Enterprise SLAs",
+      "items": [
+        "Dedicated Vertex AI Endpoint with 16GB /dev/shm",
+        "Health checks (/ping) and automatic failover"
+      ]
+    }
+  ]
+}
